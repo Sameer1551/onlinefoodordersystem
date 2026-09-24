@@ -1,0 +1,83 @@
+@{
+    ViewData["Title"] = "Reports";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var sales = ViewBag.Sales as List<OnlineFoodOrderingSystem.Models.ViewModels.DailySales> ?? new();
+    var topFoods = ViewBag.TopFoods as List<OnlineFoodOrderingSystem.Models.ViewModels.TopFoodItem> ?? new();
+    int year = ViewBag.Year;
+    int month = ViewBag.Month;
+    
+    var months = new[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+}
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">Month</label>
+                <select name="month" class="form-select">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@i" selected="@(i == month)">@months[i - 1]</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Year</label>
+                <select name="year" class="form-select">
+                    @for (int i = DateTime.UtcNow.Year - 2; i <= DateTime.UtcNow.Year; i++)
+                    {
+                        <option value="@i" selected="@(i == year)">@i</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter Data</button>
+            </div>
+            <div class="col-md-4 text-end">
+                <button type="button" class="btn btn-outline-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="admin-stat-card border-primary">
+            <div class="stat-value">₹@sales.Sum(s => s.Revenue).ToString("N0")</div>
+            <div class="stat-label">Total Revenue for @months[month-1] @year</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="admin-stat-card border-success">
+            <div class="stat-value">@sales.Sum(s => s.Orders)</div>
+            <div class="stat-label">Total Orders for @months[month-1] @year</div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 pt-4 pb-0">
+        <h5 class="fw-700">Daily Sales Breakdown</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th class="text-center">Total Orders</th>
+                    <th class="text-end">Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in sales)
+                {
+                    <tr>
+                        <td>@DateTime.Parse(s.Date).ToString("MMM dd, yyyy")</td>
+                        <td class="text-center">@s.Orders</td>
+                        <td class="text-end fw-600 text-primary">₹@s.Revenue</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

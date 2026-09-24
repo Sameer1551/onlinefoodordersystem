@@ -1,0 +1,49 @@
+@model List<OnlineFoodOrderingSystem.Models.Entities.Address>
+@{
+    ViewData["Title"] = "My Addresses";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="section-title mb-0">My Addresses</h1>
+        <a href="/Address/Add" class="btn btn-primary"><i class="bi bi-plus me-1"></i>Add Address</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state py-5">
+            <div class="empty-icon">📍</div>
+            <h4>No addresses saved</h4>
+            <p class="text-muted">Add a delivery address to checkout faster</p>
+            <a href="/Address/Add" class="btn btn-primary mt-3">Add Address</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var addr in Model)
+            {
+                <div class="col-md-6">
+                    <div class="address-card @(addr.IsDefault ? "address-card-default" : "")">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="badge bg-primary-soft text-primary me-2">@addr.Label</span>
+                                @if (addr.IsDefault) { <span class="badge bg-success-soft text-success">Default</span> }
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="/Address/Edit/@addr.AddressId" class="btn btn-icon btn-sm"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" asp-controller="Address" method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete this address?')">
+                                    <input type="hidden" name="id" value="@addr.AddressId">
+                                    <button class="btn btn-icon btn-sm text-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="mt-2 fw-600">@addr.AddressLine</div>
+                        <div class="text-muted small">@addr.City, @addr.State – @addr.PinCode</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,64 @@
+@model List<OnlineFoodOrderingSystem.Models.Entities.Coupon>
+@{
+    ViewData["Title"] = "Manage Coupons";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Coupons</h4>
+    <a href="/Admin/Coupon/Create" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add New</a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Code</th>
+                    <th>Discount</th>
+                    <th>Constraints</th>
+                    <th>Restaurant</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td class="fw-700 text-uppercase text-primary">@c.Code</td>
+                        <td>
+                            @if (c.DiscountType == "Percentage") { <span>@c.DiscountValue%</span> }
+                            else { <span>₹@c.DiscountValue</span> }
+                        </td>
+                        <td class="small text-muted">
+                            Min: ₹@c.MinOrderValue<br>
+                            Valid till: @(c.ExpiryDate.HasValue ? c.ExpiryDate.Value.ToString("MMM dd, yyyy") : "No Expiry")
+                        </td>
+                        <td>@(c.Restaurant?.Name ?? "All Restaurants")</td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox"
+                                       @(c.IsActive ? "checked" : "") onchange="toggleCoupon(@c.CouponId)">
+                            </div>
+                        </td>
+                        <td>
+                            <form asp-action="Delete" method="post" onsubmit="return confirm('Delete this coupon?')">
+                                <input type="hidden" name="id" value="@c.CouponId" />
+                                <button class="btn btn-sm btn-icon text-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function toggleCoupon(id) {
+        $.post('/Admin/Coupon/Toggle/' + id);
+    }
+</script>
+}

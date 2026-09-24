@@ -1,0 +1,72 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">🍕</div>
+            <h2 class="auth-title">Welcome Back!</h2>
+            <p class="auth-subtitle">Login to continue</p>
+        </div>
+        <form asp-action="Login" asp-controller="Account" method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Email" class="form-control" id="emailInput" placeholder="Email" autocomplete="email">
+                <label for="emailInput"><i class="bi bi-envelope me-1"></i> Email Address</label>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3 position-relative">
+                <input asp-for="Password" class="form-control" id="passwordInput" placeholder="Password" autocomplete="current-password">
+                <label for="passwordInput"><i class="bi bi-lock me-1"></i> Password</label>
+                <button type="button" class="btn btn-icon pass-toggle" onclick="togglePassword('passwordInput')">
+                    <i class="bi bi-eye" id="eyeIcon"></i>
+                </button>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    <input asp-for="RememberMe" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label small" for="rememberMe">Remember me</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" id="loginBtn">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </button>
+
+            <div class="auth-divider"><span>or continue with</span></div>
+
+            <div class="d-flex gap-2 mb-4">
+                <a href="/Account/ExternalLogin?provider=Google&returnUrl=/" class="btn btn-social w-50">
+                    <img src="https://www.google.com/favicon.ico" width="16" class="me-2"> Google
+                </a>
+                <a href="/Account/ExternalLogin?provider=Facebook&returnUrl=/" class="btn btn-social w-50">
+                    <i class="bi bi-facebook me-2 text-primary"></i> Facebook
+                </a>
+            </div>
+
+            <p class="text-center text-muted small">
+                Don't have an account? <a href="/Account/Register" class="auth-link">Register here</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') { input.type = 'text'; icon.className = 'bi bi-eye-slash'; }
+            else { input.type = 'password'; icon.className = 'bi bi-eye'; }
+        }
+    </script>
+}

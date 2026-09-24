@@ -1,0 +1,93 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.OrderSummaryViewModel
+@{
+    ViewData["Title"] = "Track Order";
+    var steps = new[] { "Order Placed", "Preparing", "Packed", "Out for Delivery", "Delivered" };
+    var stepStatuses = new[] { "Pending", "Preparing", "Packed", "OutForDelivery", "Delivered" };
+    var currentStep = Model.CurrentStepIndex;
+    var isCancelled = Model.Order.Status == "Cancelled";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="track-card">
+                <div class="track-header">
+                    <div>
+                        <h2 class="track-order-id">#ORD@(Model.Order.OrderId.ToString("D5"))</h2>
+                        <p class="text-muted small">@Model.Order.OrderDate.ToString("dd MMM yyyy, hh:mm tt")</p>
+                    </div>
+                    <span class="status-pill status-@Model.Order.Status.ToLower()">@Model.StatusLabel</span>
+                </div>
+
+                <!-- Status Timeline -->
+                @if (!isCancelled)
+                {
+                    <div class="track-timeline mt-4">
+                        @for (int i = 0; i < steps.Length; i++)
+                        {
+                            <div class="track-step @(i <= currentStep ? "completed" : "") @(i == currentStep ? "current" : "")">
+                                <div class="track-step-dot">
+                                    @if (i < currentStep) { <i class="bi bi-check-lg"></i> }
+                                    else if (i == currentStep) { <i class="bi bi-circle-fill"></i> }
+                                    else { <i class="bi bi-circle"></i> }
+                                </div>
+                                <div class="track-step-label">@steps[i]</div>
+                            </div>
+                            @if (i < steps.Length - 1)
+                            {
+                                <div class="track-connector @(i < currentStep ? "completed" : "")"></div>
+                            }
+                        }
+                    </div>
+
+                    @if (Model.Order.Status != "Delivered")
+                    {
+                        <div class="track-eta text-center mt-4">
+                            <i class="bi bi-clock text-primary me-2"></i>
+                            Estimated delivery: <strong>@Model.Order.Restaurant?.DeliveryTimeMinMinutes–@Model.Order.Restaurant?.DeliveryTimeMaxMinutes mins</strong>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-danger mt-4">
+                        <i class="bi bi-x-circle me-2"></i>This order has been cancelled.
+                    </div>
+                }
+
+                <!-- Order Details -->
+                <div class="track-items mt-4">
+                    <h5 class="fw-700 mb-3">Items Ordered</h5>
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="d-flex justify-content-between small mb-2">
+                            <span>@item.FoodItem?.Name × @item.Quantity</span>
+                            <span class="fw-600">₹@(item.Quantity * item.UnitPrice)</span>
+                        </div>
+                    }
+                    <hr>
+                    <div class="d-flex justify-content-between"><span>Subtotal</span><span>₹@Model.Order.SubTotal</span></div>
+                    <div class="d-flex justify-content-between"><span>Delivery</span><span>₹@Model.Order.DeliveryFee</span></div>
+                    <div class="d-flex justify-content-between"><span>GST</span><span>₹@Model.Order.GST</span></div>
+                    @if (Model.Order.Discount > 0)
+                    {
+                        <div class="d-flex justify-content-between text-success"><span>Discount</span><span>-₹@Model.Order.Discount</span></div>
+                    }
+                    <div class="d-flex justify-content-between fw-700 mt-2">
+                        <span>Total</span><span class="text-primary">₹@Model.Order.TotalAmount</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a href="/Order/History" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left me-1"></i>All Orders
+                    </a>
+                    <form asp-action="Reorder" asp-controller="Order" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.Order.OrderId">
+                        <button class="btn btn-primary"><i class="bi bi-arrow-clockwise me-1"></i>Reorder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

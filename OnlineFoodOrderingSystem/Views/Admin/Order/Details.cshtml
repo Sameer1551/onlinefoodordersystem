@@ -1,0 +1,145 @@
+@model OnlineFoodOrderingSystem.Models.Entities.Order
+@{
+    ViewData["Title"] = "Order Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var nextStatuses = new Dictionary<string, string[]>
+    {
+        { "Pending", new[] { "Preparing", "Cancelled" } },
+        { "Preparing", new[] { "OutForDelivery", "Cancelled" } },
+        { "OutForDelivery", new[] { "Delivered", "Cancelled" } },
+        { "Delivered", new string[0] },
+        { "Cancelled", new string[0] }
+    };
+}
+
+<div class="row g-4">
+    <!-- Left: Order Details & Items -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-700 mb-0">Order #ORD@(Model.OrderId.ToString("D5"))</h5>
+                <span class="status-pill status-@Model.Status.ToLower()">@Model.Status</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-muted small mb-4">
+                    <div class="col-md-4">
+                        <i class="bi bi-calendar"></i> @Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")
+                    </div>
+                    <div class="col-md-4">
+                        <i class="bi bi-credit-card"></i> Payment: @Model.PaymentMethod
+                    </div>
+                    <div class="col-md-4">
+                        <i class="bi bi-shop"></i> @Model.Restaurant?.Name
+                    </div>
+                </div>
+
+                <h6 class="fw-700">Order Items</h6>
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead class="border-bottom">
+                            <tr>
+                                <th>Item</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderItems)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="@(item.FoodItem?.ImageUrl ?? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop")" width="40" height="40" class="rounded object-fit-cover">
+                                            <span>@item.FoodItem?.Name</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">₹@item.UnitPrice</td>
+                                    <td class="text-end fw-600">₹@(item.Quantity * item.UnitPrice)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-4 border-top pt-3">
+                    <div class="col-md-6 offset-md-6">
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span>Subtotal</span><span>₹@Model.SubTotal</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span>Delivery</span><span>₹@Model.DeliveryFee</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span>Taxes (GST)</span><span>₹@Model.GST</span>
+                        </div>
+                        @if (Model.Discount > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2 small text-success">
+                                <span>Discount</span><span>-₹@Model.Discount</span>
+                            </div>
+                        }
+                        <div class="d-flex justify-content-between mt-2 fw-700 pt-2 border-top">
+                            <span>Total Amount</span><span class="text-primary fs-5">₹@Model.TotalAmount</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Customer, Address & Actions -->
+    <div class="col-lg-4">
+        <!-- Status Update -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body">
+                <h6 class="fw-700 mb-3">Update Status</h6>
+                @if (nextStatuses.ContainsKey(Model.Status) && nextStatuses[Model.Status].Any())
+                {
+                    <form asp-action="UpdateStatus" method="post">
+                        <input type="hidden" name="orderId" value="@Model.OrderId">
+                        <div class="input-group">
+                            <select name="status" class="form-select">
+                                @foreach (var s in nextStatuses[Model.Status])
+                                {
+                                    <option value="@s">@s</option>
+                                }
+                            </select>
+                            <button class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-secondary small mb-0">No further status updates possible.</div>
+                }
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body">
+                <h6 class="fw-700 mb-3">Customer Information</h6>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="nav-avatar bg-primary-soft text-primary">@Model.User?.FullName?.Substring(0,1)</div>
+                    <div>
+                        <div class="fw-600">@Model.User?.FullName</div>
+                        <div class="small text-muted">@Model.User?.Email</div>
+                        <div class="small text-muted">@Model.User?.PhoneNumber</div>
+                    </div>
+                </div>
+                <hr>
+                <h6 class="fw-700 mb-2">Delivery Address</h6>
+                @if (Model.Address != null)
+                {
+                    <div class="small">
+                        <span class="badge bg-light text-dark mb-1">@Model.Address.Label</span><br>
+                        @Model.Address.AddressLine<br>
+                        @Model.Address.City, @Model.Address.State - @Model.Address.PinCode
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

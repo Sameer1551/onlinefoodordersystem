@@ -1,0 +1,106 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "My Cart";
+}
+
+<div class="container py-5">
+    <h1 class="section-title mb-4">My Cart
+        @if (Model.Items.Any())
+        { <span class="text-muted fw-400 fs-5">(@Model.Items.Count item@(Model.Items.Count != 1 ? "s" : ""))</span> }
+    </h1>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="empty-state py-5">
+            <div class="empty-icon" style="font-size:80px">🛒</div>
+            <h3 class="mt-3">Your cart is empty</h3>
+            <p class="text-muted">Add items from a restaurant to get started</p>
+            <a href="/Restaurant" class="btn btn-primary mt-3 px-4">Browse Restaurants</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Cart Items -->
+            <div class="col-lg-7">
+                @if (Model.Restaurant != null)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-shop text-primary"></i>
+                        <span class="fw-600">@Model.Restaurant.Name</span>
+                    </div>
+                }
+                @foreach (var item in Model.Items)
+                {
+                    <div class="cart-item-row" id="cartRow_@item.FoodId">
+                        <img src="@(item.FoodItem!.ImageUrl ?? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop")"
+                             alt="@item.FoodItem.Name" class="cart-item-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop'">
+                        <div class="cart-item-info">
+                            <span class="veg-indicator @(item.FoodItem.IsVeg ? "veg" : "nonveg") me-1"></span>
+                            <h6 class="cart-item-name">@item.FoodItem.Name</h6>
+                            <div class="cart-item-price">₹@item.FoodItem.Price</div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" class="d-inline">
+                                <input type="hidden" name="foodId" value="@item.FoodId">
+                                <div class="qty-control">
+                                    <button type="submit" name="quantity" value="@(item.Quantity - 1)" class="qty-btn">
+                                        <i class="bi bi-@(item.Quantity == 1 ? "trash" : "dash")"></i>
+                                    </button>
+                                    <span class="qty-val">@item.Quantity</span>
+                                    <button type="submit" name="quantity" value="@(item.Quantity + 1)" class="qty-btn">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="cart-item-total">₹@(item.Quantity * item.FoodItem.Price)</div>
+                        </div>
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <form asp-action="Clear" asp-controller="Cart" method="post" class="d-inline">
+                        <button class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>Clear Cart
+                        </button>
+                    </form>
+                    <a href="/Restaurant/Menu/@Model.Restaurant?.RestaurantId" class="btn btn-outline-primary btn-sm ms-2">
+                        <i class="bi bi-plus me-1"></i>Add More Items
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-5">
+                <div class="order-summary-card">
+                    <h5 class="fw-700 mb-4">Order Summary</h5>
+                    <div class="summary-row">
+                        <span>@Model.Items.Count Item@(Model.Items.Count != 1 ? "s" : "")</span>
+                        <span>₹@Model.SubTotal</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Delivery Charges</span>
+                        <span class="@(Model.DeliveryFee == 0 ? "text-success" : "")">
+                            @(Model.DeliveryFee == 0 ? "FREE" : "₹" + Model.DeliveryFee)
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Taxes & Fees (5%)</span>
+                        <span>₹@Model.GST</span>
+                    </div>
+                    <hr>
+                    <div class="summary-row total-row">
+                        <span>Total</span>
+                        <span class="text-primary fw-700">₹@Model.Total</span>
+                    </div>
+                    <a href="/Checkout" class="btn btn-primary w-100 btn-lg mt-4">
+                        <i class="bi bi-arrow-right me-2"></i>Proceed to Checkout
+                    </a>
+                    <a href="/Restaurant" class="btn btn-link w-100 mt-2 text-muted small">
+                        <i class="bi bi-arrow-left me-1"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,78 @@
+@model OnlineFoodOrderingSystem.Models.Entities.Restaurant
+@{
+    ViewData["Title"] = Model.RestaurantId == 0 ? "Add Restaurant" : "Edit Restaurant";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <h4 class="mb-4">@ViewData["Title"]</h4>
+        <form asp-action="@(Model.RestaurantId == 0 ? "Create" : "Edit")" method="post" enctype="multipart/form-data">
+            @if (Model.RestaurantId != 0) { <input type="hidden" asp-for="RestaurantId" /> }
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Name" class="form-control" placeholder="Name">
+                        <label asp-for="Name">Restaurant Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="CuisineTags" class="form-control" placeholder="Cuisines">
+                        <label asp-for="CuisineTags">Cuisines (comma separated)</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Description" class="form-control" style="height:100px" placeholder="Desc"></textarea>
+                        <label asp-for="Description">Description</label>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="form-floating">
+                                <input asp-for="DeliveryTimeMinMinutes" class="form-control" placeholder="Min Time">
+                                <label asp-for="DeliveryTimeMinMinutes">Min Time (mins)</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating">
+                                <input asp-for="DeliveryTimeMaxMinutes" class="form-control" placeholder="Max Time">
+                                <label asp-for="DeliveryTimeMaxMinutes">Max Time (mins)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="FreeDeliveryAboveAmount" class="form-control" placeholder="Free Delivery Above">
+                        <label asp-for="FreeDeliveryAboveAmount">Free Delivery Above (₹)</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="City" class="form-control" placeholder="City">
+                        <label asp-for="City">City</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Address" class="form-control" style="height:100px" placeholder="Address"></textarea>
+                        <label asp-for="Address">Complete Address</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Logo Image</label>
+                        <input type="file" name="logoFile" class="form-control">
+                        @if(Model.LogoUrl != null) { <img src="@Model.LogoUrl" height="50" class="mt-2 rounded"> }
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Banner Image</label>
+                        <input type="file" name="bannerFile" class="form-control">
+                        @if(Model.BannerUrl != null) { <img src="@Model.BannerUrl" height="50" class="mt-2 rounded"> }
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="IsActive" class="form-check-input">
+                        <label asp-for="IsActive" class="form-check-label">Is Active / Open</label>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary px-4">Save Restaurant</button>
+                <a href="/Admin/Restaurant" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

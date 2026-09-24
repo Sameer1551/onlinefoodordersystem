@@ -1,0 +1,68 @@
+@model List<OnlineFoodOrderingSystem.Models.Entities.Order>
+@{
+    ViewData["Title"] = "Manage Orders";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var statuses = new[] { "All", "Pending", "Preparing", "OutForDelivery", "Delivered", "Cancelled" };
+    var currentStatus = ViewBag.StatusFilter as string ?? "All";
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+        <a href="?status=All" class="btn w-100 @(currentStatus == "All" ? "btn-primary" : "btn-outline-primary")">All (@ViewBag.AllCount)</a>
+    </div>
+    <div class="col-6 col-md-2">
+        <a href="?status=Pending" class="btn w-100 @(currentStatus == "Pending" ? "btn-primary" : "btn-outline-primary")">Pending (@ViewBag.PendingCount)</a>
+    </div>
+    <div class="col-6 col-md-2">
+        <a href="?status=Preparing" class="btn w-100 @(currentStatus == "Preparing" ? "btn-primary" : "btn-outline-primary")">Preparing (@ViewBag.PreparingCount)</a>
+    </div>
+    <div class="col-6 col-md-2">
+        <a href="?status=OutForDelivery" class="btn w-100 @(currentStatus == "OutForDelivery" ? "btn-primary" : "btn-outline-primary")">Out for Del (@ViewBag.OutForDeliveryCount)</a>
+    </div>
+    <div class="col-6 col-md-2">
+        <a href="?status=Delivered" class="btn w-100 @(currentStatus == "Delivered" ? "btn-success" : "btn-outline-success")">Delivered (@ViewBag.DeliveredCount)</a>
+    </div>
+    <div class="col-6 col-md-2">
+        <a href="?status=Cancelled" class="btn w-100 @(currentStatus == "Cancelled" ? "btn-danger" : "btn-outline-danger")">Cancelled (@ViewBag.CancelledCount)</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Restaurant</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr>
+                        <td class="fw-600">#ORD@(o.OrderId.ToString("D5"))</td>
+                        <td>
+                            <div class="small">@o.OrderDate.ToString("MMM dd, yyyy")</div>
+                            <div class="small text-muted">@o.OrderDate.ToString("hh:mm tt")</div>
+                        </td>
+                        <td>
+                            <div>@o.User?.FullName</div>
+                            <div class="small text-muted">@o.User?.PhoneNumber</div>
+                        </td>
+                        <td>@o.Restaurant?.Name</td>
+                        <td class="fw-600 text-primary">₹@o.TotalAmount</td>
+                        <td><span class="status-pill status-@o.Status.ToLower()">@o.Status</span></td>
+                        <td>
+                            <a href="/Admin/Order/Details/@o.OrderId" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

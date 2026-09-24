@@ -1,0 +1,70 @@
+@model OnlineFoodOrderingSystem.Models.Entities.FoodItem
+@{
+    ViewData["Title"] = Model.FoodId == 0 ? "Add Food Item" : "Edit Food Item";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card border-0 shadow-sm rounded-4" style="max-width:800px; margin:0 auto">
+    <div class="card-body p-4">
+        <h4 class="mb-4">@ViewData["Title"]</h4>
+        <form asp-action="@(Model.FoodId == 0 ? "Create" : "Edit")" method="post" enctype="multipart/form-data">
+            @if (Model.FoodId != 0) { <input type="hidden" asp-for="FoodId" /> }
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Name" class="form-control" placeholder="Name">
+                        <label asp-for="Name">Food Name</label>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Price" class="form-control" placeholder="Price">
+                        <label asp-for="Price">Price (₹)</label>
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="RestaurantId" class="form-select" asp-items="ViewBag.Restaurants">
+                            <option value="">Select Restaurant</option>
+                        </select>
+                        <label asp-for="RestaurantId">Restaurant</label>
+                        <span asp-validation-for="RestaurantId" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                            <option value="">Select Category</option>
+                        </select>
+                        <label asp-for="CategoryId">Category</label>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Description" class="form-control" style="height:100px" placeholder="Desc"></textarea>
+                        <label asp-for="Description">Description</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Food Image</label>
+                        <input type="file" name="imageFile" class="form-control">
+                        @if(Model.ImageUrl != null) { <img src="@Model.ImageUrl" height="60" class="mt-2 rounded"> }
+                    </div>
+                    <div class="d-flex gap-4 mb-3">
+                        <div class="form-check">
+                            <input asp-for="IsVeg" class="form-check-input">
+                            <label asp-for="IsVeg" class="form-check-label"><span class="veg-indicator veg me-1"></span>Is Veg</label>
+                        </div>
+                        <div class="form-check">
+                            <input asp-for="IsAvailable" class="form-check-input">
+                            <label asp-for="IsAvailable" class="form-check-label">Available</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary px-4">Save Food Item</button>
+                <a href="/Admin/Food" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

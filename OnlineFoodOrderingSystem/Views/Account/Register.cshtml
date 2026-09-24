@@ -1,0 +1,58 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Your Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-page">
+    <div class="auth-card" style="max-width:480px">
+        <div class="auth-header">
+            <div class="auth-logo">🍕</div>
+            <h2 class="auth-title">Create Your Account</h2>
+            <p class="auth-subtitle">Join us and enjoy best food</p>
+        </div>
+        <form asp-action="Register" asp-controller="Account" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="FullName" class="form-control" id="fullName" placeholder="Full Name">
+                <label for="fullName"><i class="bi bi-person me-1"></i> Full Name</label>
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Email" class="form-control" id="regEmail" placeholder="Email" autocomplete="email">
+                <label for="regEmail"><i class="bi bi-envelope me-1"></i> Email Address</label>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Phone" class="form-control" id="regPhone" placeholder="Phone">
+                <label for="regPhone"><i class="bi bi-phone me-1"></i> Phone Number</label>
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3 position-relative">
+                <input asp-for="Password" class="form-control" id="regPassword" placeholder="Password" autocomplete="new-password">
+                <label for="regPassword"><i class="bi bi-lock me-1"></i> Password</label>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-4">
+                <input asp-for="ConfirmPassword" class="form-control" id="confirmPwd" placeholder="Confirm" autocomplete="new-password">
+                <label for="confirmPwd"><i class="bi bi-lock-fill me-1"></i> Confirm Password</label>
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg mb-3" id="registerBtn">
+                <i class="bi bi-person-plus me-2"></i>Register
+            </button>
+
+            <p class="text-center text-muted small">
+                Already have an account? <a href="/Account/Login" class="auth-link">Login here</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

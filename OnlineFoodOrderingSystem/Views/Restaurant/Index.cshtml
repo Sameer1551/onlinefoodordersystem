@@ -1,0 +1,77 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.RestaurantListViewModel
+@{
+    ViewData["Title"] = "Browse Restaurants";
+}
+
+<div class="container py-5">
+    <h1 class="section-title mb-1">Browse Restaurants</h1>
+    <p class="text-muted mb-4">@Model.Restaurants.Count restaurants available</p>
+
+    <!-- Search + Filters -->
+    <form method="get" class="row g-3 mb-5 align-items-end">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="search" value="@Model.SearchQuery" placeholder="Search restaurants...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="cuisine">
+                <option value="">All Cuisines</option>
+                @foreach (var c in new[]{"Pizza","Burger","Chinese","South Indian","Desserts","Beverages"})
+                {
+                    <option value="@c" selected="@(Model.CuisineFilter == c)">@c</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="sortBy">
+                <option value="" selected="@(string.IsNullOrEmpty(Model.SortBy))">Most Popular</option>
+                <option value="rating" selected="@(Model.SortBy == "rating")">Top Rated</option>
+                <option value="delivery" selected="@(Model.SortBy == "delivery")">Fastest Delivery</option>
+                <option value="name" selected="@(Model.SortBy == "name")">A to Z</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Apply</button>
+        </div>
+    </form>
+
+    @if (!Model.Restaurants.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🏪</div>
+            <h4>No restaurants found</h4>
+            <p class="text-muted">Try different filters</p>
+            <a href="/Restaurant" class="btn btn-primary mt-2">Clear Filters</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var r in Model.Restaurants)
+            {
+                <div class="col-sm-6 col-lg-4">
+                    <a href="/Restaurant/Menu/@r.RestaurantId" class="restaurant-card">
+                        <div class="restaurant-card-img-wrap">
+                            <img src="@(r.BannerUrl ?? "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop")"
+                                 alt="@r.Name" class="restaurant-card-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop'">
+                            @if (!r.IsActive) { <span class="restaurant-card-badge bg-secondary">Closed</span> }
+                            else if (r.AvgRating >= 4.3m) { <span class="restaurant-card-badge">⭐ Top Rated</span> }
+                        </div>
+                        <div class="restaurant-card-body">
+                            <h5 class="restaurant-card-name">@r.Name</h5>
+                            <p class="restaurant-card-cuisine text-muted small">@r.CuisineTags</p>
+                            <p class="text-muted small mb-2" style="font-size:0.78rem">@r.Address</p>
+                            <div class="restaurant-card-meta">
+                                <span class="rating-pill"><i class="bi bi-star-fill"></i> @r.AvgRating</span>
+                                <span class="text-muted small">@r.DeliveryTimeMinMinutes–@r.DeliveryTimeMaxMinutes min</span>
+                                <span class="text-muted small">Free ₹@r.FreeDeliveryAboveAmount+</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</div>

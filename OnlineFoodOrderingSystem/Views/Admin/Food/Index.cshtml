@@ -1,0 +1,81 @@
+@model List<OnlineFoodOrderingSystem.Models.Entities.FoodItem>
+@{
+    ViewData["Title"] = "Manage Foods";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var restaurants = ViewBag.Restaurants as List<OnlineFoodOrderingSystem.Models.Entities.Restaurant>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Food Items</h4>
+    <div class="d-flex gap-2">
+        <form method="get" class="d-flex">
+            <select name="restaurantId" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">All Restaurants</option>
+                @if(restaurants != null) {
+                    foreach(var r in restaurants) {
+                        <option value="@r.RestaurantId" selected="@(ViewBag.SelectedRestaurantId == r.RestaurantId)">@r.Name</option>
+                    }
+                }
+            </select>
+        </form>
+        <a href="/Admin/Food/Create" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>Add New</a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Image</th>
+                    <th>Name & Type</th>
+                    <th>Restaurant</th>
+                    <th>Price</th>
+                    <th>Available</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="@(f.ImageUrl ?? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop")"
+                                 class="rounded" width="48" height="48" style="object-fit:cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop'">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="veg-indicator @(f.IsVeg ? "veg" : "nonveg")"></span>
+                                <div class="fw-600">@f.Name</div>
+                            </div>
+                            <div class="small text-muted">@f.Category?.Name</div>
+                        </td>
+                        <td>@f.Restaurant?.Name</td>
+                        <td class="fw-600">₹@f.Price</td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox"
+                                       @(f.IsAvailable ? "checked" : "") onchange="toggleFood(@f.FoodId)">
+                            </div>
+                        </td>
+                        <td>
+                            <a href="/Admin/Food/Edit/@f.FoodId" class="btn btn-sm btn-icon"><i class="bi bi-pencil"></i></a>
+                            <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this food item?')">
+                                <input type="hidden" name="id" value="@f.FoodId" />
+                                <button class="btn btn-sm btn-icon text-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function toggleFood(id) {
+        $.post('/Admin/Food/ToggleAvailability/' + id);
+    }
+</script>
+}

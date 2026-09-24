@@ -1,0 +1,152 @@
+@model List<OnlineFoodOrderingSystem.Models.Entities.Restaurant>
+@{
+    ViewData["Title"] = "Delicious Food, Delivered Fast";
+    var categories = ViewBag.Categories as List<OnlineFoodOrderingSystem.Models.Entities.Category> ?? new();
+    var searchQuery = ViewBag.SearchQuery as string;
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title">Delicious Food,<br><span class="text-gradient">Delivered Fast</span></h1>
+                <p class="hero-subtitle">Order your favorite food from the best restaurants near you and enjoy fast delivery.</p>
+                <form action="/Home/Search" method="get" class="hero-search-form">
+                    <div class="hero-search-wrap">
+                        <i class="bi bi-search hero-search-icon"></i>
+                        <input type="search" name="q" class="form-control hero-search"
+                               placeholder="Search for restaurants, pizzas, burgers..." value="@searchQuery">
+                        <button type="submit" class="btn btn-primary hero-search-btn">Search</button>
+                    </div>
+                </form>
+                <div class="hero-badges mt-4">
+                    <div class="hero-badge"><i class="bi bi-lightning-fill text-warning"></i> Fast Delivery</div>
+                    <div class="hero-badge"><i class="bi bi-star-fill text-warning"></i> Best Quality</div>
+                    <div class="hero-badge"><i class="bi bi-credit-card-fill text-success"></i> Easy Payment</div>
+                    <div class="hero-badge"><i class="bi bi-tag-fill text-primary"></i> Great Offers</div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+                <div class="hero-image-wrap">
+                    <div class="hero-circle"></div>
+                    <div class="hero-food-emoji">🍕</div>
+                    <div class="floating-badge fb-1">🍔 Burger</div>
+                    <div class="floating-badge fb-2">🍜 Noodles</div>
+                    <div class="floating-badge fb-3">⭐ 4.8 rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Categories -->
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Popular Categories</h2>
+        </div>
+        <div class="row g-3">
+            @foreach (var cat in categories)
+            {
+                <div class="col-6 col-sm-4 col-md-2">
+                    <a href="/Restaurant?cuisine=@cat.Name" class="category-card">
+                        <div class="category-icon">
+                            @switch (cat.Name)
+                            {
+                                case "Pizza": <span>🍕</span> break;
+                                case "Burger": <span>🍔</span> break;
+                                case "Chinese": <span>🍜</span> break;
+                                case "South Indian": <span>🥘</span> break;
+                                case "Desserts": <span>🍰</span> break;
+                                case "Beverages": <span>🥤</span> break;
+                                default: <span>🍽️</span> break;
+                            }
+                        </div>
+                        <span class="category-name">@cat.Name</span>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Popular Restaurants -->
+<section class="section-padding bg-light-alt">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Popular Restaurants</h2>
+            <a href="/Restaurant" class="btn btn-link text-primary fw-600">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🍽️</div>
+                <h4>No restaurants found</h4>
+                <p class="text-muted">Try a different search term</p>
+            </div>
+        }
+        <div class="row g-4">
+            @foreach (var r in Model.Take(8))
+            {
+                <div class="col-sm-6 col-lg-3">
+                    <a href="/Restaurant/Menu/@r.RestaurantId" class="restaurant-card">
+                        <div class="restaurant-card-img-wrap">
+                            <img src="@(r.BannerUrl ?? "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop")"
+                                 alt="@r.Name" class="restaurant-card-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop'">
+                            @if (r.AvgRating >= 4.3m)
+                            {
+                                <span class="restaurant-card-badge">⭐ Top Rated</span>
+                            }
+                        </div>
+                        <div class="restaurant-card-body">
+                            <h5 class="restaurant-card-name">@r.Name</h5>
+                            <p class="restaurant-card-cuisine">@r.CuisineTags</p>
+                            <div class="restaurant-card-meta">
+                                <span class="rating-pill"><i class="bi bi-star-fill"></i> @r.AvgRating</span>
+                                <span class="text-muted small">@r.DeliveryTimeMinMinutes–@r.DeliveryTimeMaxMinutes min</span>
+                                <span class="text-muted small">Free above ₹@r.FreeDeliveryAboveAmount</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Offer Banners -->
+<section class="section-padding">
+    <div class="container">
+        <h2 class="section-title mb-4">Today's Offers</h2>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="offer-card offer-orange">
+                    <div>
+                        <div class="offer-percent">20% OFF</div>
+                        <div class="offer-text">On your first order</div>
+                    </div>
+                    <div class="offer-emoji">🎉</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="offer-card offer-red">
+                    <div>
+                        <div class="offer-percent">Flat ₹100 OFF</div>
+                        <div class="offer-text">On orders above ₹400</div>
+                    </div>
+                    <div class="offer-emoji">🔥</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="offer-card offer-green">
+                    <div>
+                        <div class="offer-percent">Free Delivery</div>
+                        <div class="offer-text">On orders above ₹199</div>
+                    </div>
+                    <div class="offer-emoji">🛵</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

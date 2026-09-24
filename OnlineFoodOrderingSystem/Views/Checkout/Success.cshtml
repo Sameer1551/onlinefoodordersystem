@@ -1,0 +1,57 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.OrderSummaryViewModel
+@{
+    ViewData["Title"] = "Order Placed Successfully!";
+}
+
+<div class="container py-5">
+    <div class="success-page text-center">
+        <div class="success-checkmark">
+            <div class="check-icon">✓</div>
+        </div>
+        <h2 class="success-title mt-4">Order Placed Successfully!</h2>
+        <p class="text-muted">Your order has been placed and is being processed.</p>
+
+        <div class="success-order-card">
+            <div class="success-order-id">
+                <span class="text-muted small">Order ID</span>
+                <div class="order-id-badge">#ORD@(Model.Order.OrderId.ToString("D5"))</div>
+            </div>
+            <div class="success-order-meta">
+                <div class="success-meta-item">
+                    <i class="bi bi-clock text-primary"></i>
+                    <div>
+                        <div class="small text-muted">Estimated Delivery</div>
+                        <div class="fw-600">@(Model.Order.Restaurant?.DeliveryTimeMinMinutes)–@(Model.Order.Restaurant?.DeliveryTimeMaxMinutes) mins</div>
+                    </div>
+                </div>
+                <div class="success-meta-item">
+                    <i class="bi bi-cash-coin text-success"></i>
+                    <div>
+                        <div class="small text-muted">Payment</div>
+                        <div class="fw-600">@Model.Order.PaymentMethod</div>
+                    </div>
+                </div>
+                <div class="success-meta-item">
+                    <i class="bi bi-shop text-primary"></i>
+                    <div>
+                        <div class="small text-muted">Restaurant</div>
+                        <div class="fw-600">@Model.Order.Restaurant?.Name</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="success-total-badge">
+            Total Paid: <strong>₹@Model.Order.TotalAmount</strong>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
+            <a href="/Order/Track/@Model.Order.OrderId" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-geo-alt me-2"></i>Track Order
+            </a>
+            <a href="/Restaurant" class="btn btn-outline-primary btn-lg px-4">
+                <i class="bi bi-shop me-2"></i>Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>

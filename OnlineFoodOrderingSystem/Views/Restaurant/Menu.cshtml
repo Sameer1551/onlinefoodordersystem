@@ -1,0 +1,129 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.RestaurantMenuViewModel
+@{
+    ViewData["Title"] = Model.Restaurant.Name + " Menu";
+}
+
+<div class="menu-page">
+    <!-- Restaurant Header -->
+    <div class="restaurant-hero" style="background-image: url('@(Model.Restaurant.BannerUrl ?? "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop")')">
+        <div class="restaurant-hero-overlay"></div>
+        <div class="container position-relative">
+            <div class="restaurant-hero-content">
+                <div class="restaurant-logo-wrap">
+                    <img src="@(Model.Restaurant.LogoUrl ?? "https://images.unsplash.com/photo-1590846406792-0adc7f928a18?w=200&h=200&fit=crop")"
+                         alt="@Model.Restaurant.Name" class="restaurant-logo" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1590846406792-0adc7f928a18?w=200&h=200&fit=crop'">
+                </div>
+                <div>
+                    <h1 class="restaurant-hero-name">@Model.Restaurant.Name</h1>
+                    <p class="restaurant-hero-sub">@Model.Restaurant.CuisineTags</p>
+                    <div class="restaurant-hero-meta">
+                        <span class="rating-pill"><i class="bi bi-star-fill"></i> @Model.Restaurant.AvgRating (@Model.Restaurant.RatingCount+ ratings)</span>
+                        <span class="badge bg-light text-dark">@Model.Restaurant.DeliveryTimeMinMinutes–@Model.Restaurant.DeliveryTimeMaxMinutes min</span>
+                        <span class="badge bg-light text-dark">Free above ₹@Model.Restaurant.FreeDeliveryAboveAmount</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row g-4">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3">
+                <div class="menu-filters card card-body rounded-4 shadow-sm sticky-top" style="top:80px">
+                    <h6 class="fw-700 mb-3">Categories</h6>
+                    <form method="get" id="filterForm">
+                        <input type="hidden" name="vegOnly" value="@(Model.VegOnly?.ToString().ToLower() ?? "")" id="vegOnlyHidden">
+                        <input type="hidden" name="priceRange" value="@Model.PriceRange" id="priceRangeHidden">
+
+                        <div class="filter-categories">
+                            <a href="/Restaurant/Menu/@Model.Restaurant.RestaurantId"
+                               class="filter-cat-item @(Model.SelectedCategoryId == null ? "active" : "")">All Items</a>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <a href="/Restaurant/Menu/@Model.Restaurant.RestaurantId?categoryId=@cat.CategoryId@(Model.VegOnly == true ? "&vegOnly=true" : "")@(!string.IsNullOrEmpty(Model.PriceRange) ? "&priceRange=" + Model.PriceRange : "")"
+                                   class="filter-cat-item @(Model.SelectedCategoryId == cat.CategoryId ? "active" : "")">
+                                    @cat.Name
+                                </a>
+                            }
+                        </div>
+
+                        <hr />
+                        <h6 class="fw-700 mb-3">Price Range</h6>
+                        @foreach (var pr in new[] { ("0-200","₹0 - ₹200"), ("200-400","₹200 - ₹400"), ("400-600","₹400 - ₹600"), ("600+","₹600+") })
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="priceRangeOpt" value="@pr.Item1"
+                                       @(Model.PriceRange == pr.Item1 ? "checked" : "")
+                                       onchange="applyFilter('priceRange', this.value)">
+                                <label class="form-check-label small">@pr.Item2</label>
+                            </div>
+                        }
+
+                        <hr />
+                        <h6 class="fw-700 mb-2">Type</h6>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="vegSwitch"
+                                   @(Model.VegOnly == true ? "checked" : "") onchange="applyFilter('vegOnly', this.checked)">
+                            <label class="form-check-label small" for="vegSwitch">Veg Only</label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Food Items -->
+            <div class="col-lg-9">
+                <div class="menu-item-count mb-3">
+                    <span class="text-muted">@Model.FoodItems.Count items</span>
+                </div>
+
+                @if (!Model.FoodItems.Any())
+                {
+                    <div class="empty-state">
+                        <div class="empty-icon">🥗</div>
+                        <h4>No items found</h4>
+                        <p class="text-muted">Try adjusting your filters</p>
+                    </div>
+                }
+
+                <div class="menu-items-list">
+                    @foreach (var food in Model.FoodItems)
+                    {
+                        <div class="menu-item-card">
+                            <div class="menu-item-body">
+                                <div class="d-flex align-items-start gap-2">
+                                    <span class="veg-indicator @(food.IsVeg ? "veg" : "nonveg")"></span>
+                                    <div>
+                                        <h5 class="menu-item-name">@food.Name</h5>
+                                        <p class="menu-item-desc text-muted small">@food.Description</p>
+                                        <div class="menu-item-price">₹@food.Price</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-item-img-wrap">
+                                <img src="@(food.ImageUrl ?? "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop")"
+                                     alt="@food.Name" class="menu-item-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop'">
+                                <button class="btn btn-primary btn-sm add-to-cart-btn"
+                                        data-food-id="@food.FoodId"
+                                        @(!User.Identity!.IsAuthenticated ? "onclick=\"window.location='/Account/Login'\"" : "onclick=\"addToCart(this, " + food.FoodId + ")\"")>
+                                    <i class="bi bi-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function applyFilter(key, value) {
+    const url = new URL(window.location.href);
+    if (value === false || value === '' || value === null) url.searchParams.delete(key);
+    else url.searchParams.set(key, value);
+    window.location.href = url.toString();
+}
+</script>
+}

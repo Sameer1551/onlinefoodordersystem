@@ -1,0 +1,158 @@
+@model OnlineFoodOrderingSystem.Models.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-5">
+    <h1 class="section-title mb-4">Checkout</h1>
+
+    <div class="row g-4">
+        <!-- Left: Address + Payment -->
+        <div class="col-lg-7">
+            <form asp-action="PlaceOrder" asp-controller="Checkout" method="post" id="checkoutForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="discount" value="@Model.Discount" id="discountInput">
+                <input type="hidden" name="couponCode" value="@Model.CouponCode" id="couponCodeInput">
+
+                <!-- Delivery Address -->
+                <div class="checkout-section">
+                    <h5 class="checkout-section-title"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Delivery Address</h5>
+                    @if (!Model.Addresses.Any())
+                    {
+                        <div class="alert alert-warning small">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            No saved addresses. <a href="/Address/Add">Add an address</a> first.
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var addr in Model.Addresses)
+                        {
+                            <div class="address-option @(addr.IsDefault || Model.SelectedAddressId == addr.AddressId ? "selected" : "")">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="addressId"
+                                           value="@addr.AddressId" id="addr_@addr.AddressId"
+                                           @(addr.IsDefault || Model.SelectedAddressId == addr.AddressId ? "checked" : "")
+                                           required>
+                                    <label class="form-check-label w-100" for="addr_@addr.AddressId">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <span class="badge bg-primary-soft text-primary me-2">@addr.Label</span>
+                                                <span class="fw-600">@addr.AddressLine</span>
+                                                <div class="text-muted small">@addr.City, @addr.State – @addr.PinCode</div>
+                                            </div>
+                                            @if (addr.IsDefault)
+                                            { <span class="badge bg-success-soft text-success">Default</span> }
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                        <a href="/Address/Add" class="btn btn-link text-primary small p-0 mt-2">
+                            <i class="bi bi-plus-circle me-1"></i>Add new address
+                        </a>
+                    }
+                </div>
+
+                <!-- Payment Method -->
+                <div class="checkout-section mt-4">
+                    <h5 class="checkout-section-title"><i class="bi bi-credit-card-fill text-primary me-2"></i>Payment Method</h5>
+                    @foreach (var method in new[] { ("COD","Cash on Delivery","💵"), ("UPI","UPI","📱"), ("Card","Credit / Debit Card","💳"), ("NetBanking","Net Banking","🏦"), ("Wallet","Wallets","👜") })
+                    {
+                        <div class="payment-option">
+                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                   value="@method.Item1" id="pay_@method.Item1"
+                                   @(method.Item1 == "COD" ? "checked" : "")>
+                            <label class="form-check-label" for="pay_@method.Item1">
+                                <span class="me-2">@method.Item3</span> @method.Item2
+                            </label>
+                        </div>
+                    }
+                </div>
+
+                <!-- Coupon -->
+                <div class="checkout-section mt-4">
+                    <h5 class="checkout-section-title"><i class="bi bi-ticket-perforated-fill text-primary me-2"></i>Have a coupon code?</h5>
+                    <div class="coupon-input-wrap">
+                        <input type="text" class="form-control" id="couponInput" placeholder="Enter coupon code"
+                               value="@Model.CouponCode">
+                        <button type="button" class="btn btn-outline-primary" onclick="applyCoupon()">Apply</button>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.CouponMessage))
+                    {
+                        <div class="alert @(Model.Discount > 0 ? "alert-success" : "alert-danger") small mt-2 py-2">
+                            @Model.CouponMessage
+                        </div>
+                    }
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 btn-lg mt-4"
+                        @(!Model.Addresses.Any() ? "disabled" : "")>
+                    <i class="bi bi-bag-check me-2"></i>Place Order
+                </button>
+                <p class="text-muted small text-center mt-2">
+                    By placing the order, you agree to our <a href="#">Terms & Conditions</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="col-lg-5">
+            <div class="order-summary-card sticky-top" style="top:80px">
+                <h5 class="fw-700 mb-3">Order Summary</h5>
+                @if (Model.Cart.Restaurant != null)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-3 p-2 bg-light rounded-3">
+                        <i class="bi bi-shop text-primary"></i>
+                        <span class="small fw-600">@Model.Cart.Restaurant.Name</span>
+                    </div>
+                }
+                @foreach (var item in Model.Cart.Items)
+                {
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span>@item.FoodItem!.Name × @item.Quantity</span>
+                        <span class="fw-600">₹@(item.Quantity * item.FoodItem.Price)</span>
+                    </div>
+                }
+                <hr>
+                <div class="summary-row"><span>Subtotal</span><span>₹@Model.Cart.SubTotal</span></div>
+                <div class="summary-row"><span>Delivery</span>
+                    <span class="@(Model.Cart.DeliveryFee == 0 ? "text-success" : "")">
+                        @(Model.Cart.DeliveryFee == 0 ? "FREE" : "₹" + Model.Cart.DeliveryFee)
+                    </span>
+                </div>
+                <div class="summary-row"><span>Taxes (5%)</span><span>₹@Model.Cart.GST</span></div>
+                @if (Model.Discount > 0)
+                {
+                    <div class="summary-row text-success">
+                        <span>Discount (@Model.CouponCode)</span><span>-₹@Model.Discount</span>
+                    </div>
+                }
+                <hr>
+                <div class="summary-row total-row">
+                    <span>Total Amount</span>
+                    <span class="text-primary fw-700">₹@(Model.Cart.SubTotal + Model.Cart.GST + Model.Cart.DeliveryFee - Model.Discount)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim();
+    if (!code) return;
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = '/Checkout/ApplyCoupon';
+    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+    if (token) form.appendChild(token.cloneNode());
+    const input = document.createElement('input');
+    input.name = 'couponCode'; input.value = code;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+}

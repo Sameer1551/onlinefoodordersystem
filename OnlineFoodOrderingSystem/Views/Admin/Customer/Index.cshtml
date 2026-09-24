@@ -1,0 +1,52 @@
+@model List<OnlineFoodOrderingSystem.Models.Entities.ApplicationUser>
+@{
+    ViewData["Title"] = "Manage Customers";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var roles = ViewBag.CustomerRoles as Dictionary<string, string> ?? new();
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 pt-4 pb-0">
+        <h5 class="fw-700">Registered Users</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Customer</th>
+                    <th>Contact Info</th>
+                    <th>Role</th>
+                    <th>Joined (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="nav-avatar bg-primary-soft text-primary">@u.FullName?.Substring(0,1)</div>
+                                <div class="fw-600">@u.FullName</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">@u.Email</div>
+                            <div class="small text-muted">@u.PhoneNumber</div>
+                        </td>
+                        <td>
+                            @if (roles.ContainsKey(u.Id) && roles[u.Id].Contains("Admin"))
+                            {
+                                <span class="badge bg-danger-soft text-danger">Admin</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-soft text-secondary">Customer</span>
+                            }
+                        </td>
+                        <td class="small text-muted">@u.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

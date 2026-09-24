@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Track Your Order";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-logo">📦</div>
+                    <h2 class="auth-title">Track Your Order</h2>
+                    <p class="auth-subtitle">Enter your Order ID and phone number</p>
+                </div>
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger small">@ViewBag.Error</div>
+                }
+                <form method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="orderId" name="orderId" placeholder="Order ID" required>
+                        <label for="orderId"><i class="bi bi-hash me-1"></i> Order ID</label>
+                    </div>
+                    <div class="form-floating mb-4">
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone" required>
+                        <label for="phone"><i class="bi bi-phone me-1"></i> Phone Number</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">
+                        <i class="bi bi-search me-2"></i>Track Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
